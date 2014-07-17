@@ -565,7 +565,8 @@ void Layer::onDraw(const sp<const DisplayDevice>& hw, const Region& clip) const
         char property[PROPERTY_VALUE_MAX];
         if ((property_get("persist.gralloc.cp.level3", property, NULL) > 0) &&
                 (atoi(property) == 1)) {
-            canAllowGPU = true;
+            if(hw->getDisplayType() == HWC_DISPLAY_PRIMARY)
+             canAllowGPU = true;
         }
     }
 #endif
@@ -1343,6 +1344,18 @@ bool Layer::isIntOnly() const
     }
     return false;
 }
+
+bool Layer::isSecureDisplay() const
+{
+    const sp<GraphicBuffer>& activeBuffer(mActiveBuffer);
+    if (activeBuffer != 0) {
+        uint32_t usage = activeBuffer->getUsage();
+        if(usage & GRALLOC_USAGE_PRIVATE_SECURE_DISPLAY)
+            return true;
+    }
+    return false;
+}
+
 #endif
 
 #ifdef QCOM_BSP
